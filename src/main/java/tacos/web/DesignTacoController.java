@@ -1,59 +1,93 @@
 package tacos.web;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import tacos.Ingredient;
+import tacos.Order;
 import tacos.Taco;
+import tacos.data.IngredientRepository;
+import tacos.data.TacoRepository;
 
 import javax.validation.Valid;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static tacos.Ingredient.Type;
 
-@Slf4j
+/**
+ * @SessionAttributes annotation specifies any model objects like the order attribute that should be kept
+ * in session and available across multiple requests.
+ */
 @Controller
 @RequestMapping("/design")
+@SessionAttributes("order")
 public class DesignTacoController {
 
+    private final IngredientRepository ingredientRepo;
+
+    private final TacoRepository tacoRepository;
+
+    public DesignTacoController(final IngredientRepository ingredientRepo, final TacoRepository tacoRepository) {
+        this.ingredientRepo = ingredientRepo;
+        this.tacoRepository = tacoRepository;
+    }
+
     @GetMapping
-    public String showDesignForm(Model model) {
+    public String showDesignForm(final Model model) {
         model.addAttribute("design", new Taco());
         return "design";
     }
 
+    /**
+     * @ModelAttribute annotation on order() ensures that an Order object will be created
+     * in the model.
+     *
+     * @return
+     */
+    @ModelAttribute(name = "order")
+    public Order order() {
+        return new Order();
+    }
+
+    @ModelAttribute(name = "taco")
+    public Taco taco() {
+        return new Taco();
+    }
+
+    /**
+     * After checking for validation errors, processDesign() uses the injected Taco-Repository to save the taco.
+     * It then adds the Taco object to the Order that’s kept in the session.
+     * In fact, the Order object remains in the session and isn’t saved to the database until
+     * the user completes and submits the order form.
+     *
+     * The Order parameter is annotated with @ModelAttribute to indicate that its
+     * value should come from the model and that Spring MVC shouldn’t attempt to bind
+     * request parameters to it.s
+     *
+     * @param design
+     * @param errors
+     * @return
+     */
     @PostMapping
-    public String processDesign(@ModelAttribute("design") @Valid final Taco design, final Errors errors) {
+    public String processDesign(@ModelAttribute("design") @Valid final Taco design, final Errors errors,
+                                @ModelAttribute final Order order) {
         if (errors.hasErrors()) {
             return "design";
         }
-        // TODO: implement design processing
-        log.info("Processing design:" + design);
+
+        final Taco taco = tacoRepository.save(design);
+        order.addDesign(taco);
 
         return "redirect:/orders/current";
     }
 
     @ModelAttribute
     private void addIngredientsToModel(final Model model) {
-        List<Ingredient> ingredients = Arrays.asList(
-                new Ingredient("FLTO", "Flour Tortilla", Type.WRAP),
-                new Ingredient("COTO", "Corn Tortilla", Type.WRAP),
-                new Ingredient("GRBF", "Ground Beef", Type.PROTEIN),
-                new Ingredient("CARN", "Carnitas", Type.PROTEIN),
-                new Ingredient("TMTO", "Diced Tomatoes", Type.VEGGIES),
-                new Ingredient("LETC", "Lettuce", Type.VEGGIES),
-                new Ingredient("CHED", "Cheddar", Type.CHEESE),
-                new Ingredient("JACK", "Monterrey Jack", Type.CHEESE),
-                new Ingredient("SLSA", "Salsa", Type.SAUCE),
-                new Ingredient("SRCR", "Sour Cream", Type.SAUCE)
-        );
+        final List<Ingredient> ingredients = new ArrayList<>();
+        ingredientRepo.findAll().forEach(i -> ingredients.add(i));
 
         Type[] types = Ingredient.Type.values();
         for (Type type : types) {
