@@ -8,10 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -31,6 +28,7 @@ public class User implements UserDetails {
 
     private final String password;
 
+    @Column(name = "FULLNAME")
     private final String fullName;
 
     private final String street;
@@ -41,6 +39,7 @@ public class User implements UserDetails {
 
     private final String zip;
 
+    @Column(name = "PHONENUMBER")
     private final String phoneNumber;
 
     @Override

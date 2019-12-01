@@ -2,7 +2,7 @@
 create table if not exists User (
  id identity,
  username varchar(25) not null,
- password varchar(50) not null,
+ password varchar(255) not null,
  fullname varchar(50) not null,
  street varchar (25) not null,
  city varchar (25) not null,
@@ -48,6 +48,8 @@ placedAt timestamp not null,
 user_id bigint not null
 );
 
+alter table Taco_Order
+add foreign key (user_id) references User(id);
 
 create table if not exists Taco_Order_Tacos (
 tacoOrder bigint not null,
