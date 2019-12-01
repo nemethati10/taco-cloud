@@ -44,8 +44,6 @@ public class DesignTacoController {
     /**
      * @ModelAttribute annotation on order() ensures that an Order object will be created
      * in the model.
-     *
-     * @return
      */
     @ModelAttribute(name = "order")
     public Order order() {
@@ -62,7 +60,7 @@ public class DesignTacoController {
      * It then adds the Taco object to the Order that’s kept in the session.
      * In fact, the Order object remains in the session and isn’t saved to the database until
      * the user completes and submits the order form.
-     *
+     * <p>
      * The Order parameter is annotated with @ModelAttribute to indicate that its
      * value should come from the model and that Spring MVC shouldn’t attempt to bind
      * request parameters to it.s

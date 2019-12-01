@@ -15,7 +15,7 @@ public class TacoCloudApplication {
     }
 
     @Bean
-    public CommandLineRunner dataLoader(IngredientRepository repo) {
+    public CommandLineRunner dataLoader(final IngredientRepository repo) {
         return new CommandLineRunner() {
             @Override
             public void run(String... args) throws Exception {
