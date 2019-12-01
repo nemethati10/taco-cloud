@@ -1,0 +1,25 @@
+spring:
+  profiles:
+    active:
+      - dev
+
+  jpa:
+    show-sql: true
+
+server:
+  port: 9090
+
+
+logging:
+  file: TacoCloud.log
+  level:
+    org:
+      springframework:
+        security: DEBUG
+    tacos: DEBUG
+  path: /var/logs/
+
+
+taco:
+  orders:
+    pageSize: 10

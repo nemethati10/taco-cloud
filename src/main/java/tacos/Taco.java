@@ -23,8 +23,8 @@ public class Taco {
     @Column(name = "CREATEDAT")
     private Date createdAt;
 
-    @NotNull(message = "You must choose at least 1 ingredient")
-    @ManyToMany(targetEntity = Ingredient.class)
+    @ManyToMany(targetEntity=Ingredient.class)
+    @Size(min=1, message="You must choose at least 1 ingredient")
     private List<Ingredient> ingredients;
 
     @PrePersist

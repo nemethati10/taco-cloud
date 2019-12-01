@@ -1,5 +1,8 @@
 package tacos.web;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
@@ -25,14 +28,27 @@ public class OrderController {
 
     private UserRepository userRepository;
 
-    public OrderController(final OrderRepository orderRepository, final UserRepository userRepository) {
+    private OrderProps orderProps;
+
+    public OrderController(final OrderRepository orderRepository, final UserRepository userRepository,
+                           final OrderProps orderProps) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
+        this.orderProps = orderProps;
     }
 
     @GetMapping("/current")
     public String orderForm(final Model model) {
         return "orderForm";
+    }
+
+    @GetMapping
+    public String ordersForUser(@AuthenticationPrincipal final User user, final Model model) {
+        final Pageable pageable = PageRequest.of(0, orderProps.getPageSize());
+
+        model.addAttribute("orders", orderRepository.findByUserOrderByPlacedAtDesc(user, pageable));
+
+        return "orderList";
     }
 
     @PostMapping
@@ -51,4 +67,5 @@ public class OrderController {
 
         return "redirect:/";
     }
+
 }
