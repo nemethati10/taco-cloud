@@ -9,9 +9,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 import tacos.Order;
+import tacos.User;
 import tacos.data.OrderRepository;
+import tacos.data.UserRepository;
 
 import javax.validation.Valid;
+import java.security.Principal;
 
 @Controller
 @RequestMapping("/orders")
@@ -20,8 +23,11 @@ public class OrderController {
 
     private OrderRepository orderRepository;
 
-    public OrderController(final OrderRepository orderRepository) {
+    private UserRepository userRepository;
+
+    public OrderController(final OrderRepository orderRepository, final UserRepository userRepository) {
         this.orderRepository = orderRepository;
+        this.userRepository = userRepository;
     }
 
     @GetMapping("/current")
@@ -30,10 +36,15 @@ public class OrderController {
     }
 
     @PostMapping
-    public String processOrder(@Valid final Order order, final Errors errors, final SessionStatus sessionStatus) {
+    public String processOrder(@Valid final Order order, final Errors errors, final SessionStatus sessionStatus,
+                               final Principal principal) {
         if (errors.hasErrors()) {
             return "orderForm";
         }
+
+        final User user = userRepository.findByUsername(
+                principal.getName());
+        order.setUser(user);
 
         orderRepository.save(order);
         sessionStatus.setComplete();

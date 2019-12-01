@@ -7,10 +7,13 @@ import org.springframework.web.bind.annotation.*;
 import tacos.Ingredient;
 import tacos.Order;
 import tacos.Taco;
+import tacos.User;
 import tacos.data.IngredientRepository;
 import tacos.data.TacoRepository;
+import tacos.data.UserRepository;
 
 import javax.validation.Valid;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,14 +33,24 @@ public class DesignTacoController {
 
     private final TacoRepository tacoRepository;
 
-    public DesignTacoController(final IngredientRepository ingredientRepo, final TacoRepository tacoRepository) {
+    private final UserRepository userRepository;
+
+    public DesignTacoController(final IngredientRepository ingredientRepo, final TacoRepository tacoRepository,
+                                final UserRepository userRepository) {
         this.ingredientRepo = ingredientRepo;
         this.tacoRepository = tacoRepository;
+        this.userRepository = userRepository;
     }
 
     @GetMapping
-    public String showDesignForm(final Model model) {
+    public String showDesignForm(final Model model, final Principal principal) {
         model.addAttribute("design", new Taco());
+
+        final String username = principal.getName();
+        final User user = userRepository.findByUsername(username);
+
+        model.addAttribute("user", user);
+
         return "design";
     }
 
